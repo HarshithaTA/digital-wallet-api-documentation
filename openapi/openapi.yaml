@@ -1,0 +1,145 @@
+
+openapi: 3.1.0
+
+info:
+  title: Digital Wallet Bill Payment API
+  version: 1.0.0
+  description: >
+    A fictional REST API for demonstrating electricity bill
+    retrieval in a digital wallet platform. This specification
+    is for portfolio and learning purposes only.
+
+servers:
+  - url: https://api.example.com
+    description: Placeholder URL; no live service is available
+
+tags:
+  - name: Bills
+    description: Electricity bill retrieval operations
+
+paths:
+  /api/v1/bills/fetch:
+    post:
+      tags:
+        - Bills
+      operationId: fetchElectricityBill
+      summary: Fetch an electricity bill
+      description: >
+        Retrieves bill details using a provider code and
+        a service number. The endpoint describes a proposed
+        API contract and has not been tested against a live service.
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FetchBillRequest"
+            example:
+              providerCode: DEMO_ELECTRICITY
+              serviceNumber: DEMO-123456
+
+      responses:
+        "200":
+          description: Bill details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillResponse"
+              example:
+                billReference: BILL-DEMO-001
+                serviceNumber: DEMO-123456
+                amount: 1250.50
+                currency: INR
+                dueDate: "2026-11-15"
+                status: UNPAID
+
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "401":
+          description: Missing or invalid authentication
+
+        "404":
+          description: Bill or service identifier not found
+
+        "429":
+          description: Request rate limit exceeded
+
+        "500":
+          description: Unexpected server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    FetchBillRequest:
+      type: object
+      required:
+        - providerCode
+        - serviceNumber
+      properties:
+        providerCode:
+          type: string
+          description: Identifier of the electricity bill provider
+          example: DEMO_ELECTRICITY
+        serviceNumber:
+          type: string
+          description: Fictional electricity service identifier
+          example: DEMO-123456
+
+    BillResponse:
+      type: object
+      required:
+        - billReference
+        - serviceNumber
+        - amount
+        - currency
+        - dueDate
+        - status
+      properties:
+        billReference:
+          type: string
+          example: BILL-DEMO-001
+        serviceNumber:
+          type: string
+          example: DEMO-123456
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          example: 1250.50
+        currency:
+          type: string
+          example: INR
+        dueDate:
+          type: string
+          format: date
+          example: "2026-11-15"
+        status:
+          type: string
+          enum:
+            - UNPAID
+            - PAID
+          example: UNPAID
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: INVALID_REQUEST
+        message:
+          type: string
+          example: The request contains invalid fields.
